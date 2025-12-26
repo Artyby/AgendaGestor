@@ -323,51 +323,57 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 p-4">
       <header className="max-w-7xl mx-auto mb-6">
-        <div className="bg-white rounded-lg shadow-lg p-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-purple-700">
-            📅 Content Manager
-          </h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              {user.user_metadata?.avatar_url && (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="Avatar"
-                  className="w-8 h-8 rounded-full"
-                />
-              )}
-              <span className="text-sm font-medium">
-                {user.user_metadata?.full_name || user.email}
-              </span>
-            </div>
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <h1 className="text-xl lg:text-2xl font-bold text-purple-700">
+              📅 Agenda Manager
+            </h1>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+              <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-initial">
+                {user.user_metadata?.avatar_url && (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full flex-shrink-0"
+                  />
+                )}
+                <span className="text-sm font-medium truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setView("summary")}
+                  className={`px-3 lg:px-4 py-2 rounded flex items-center gap-2 text-sm lg:text-base ${
+                    view === "summary"
+                      ? "bg-purple-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <Layout size={18} />
+                  <span className="hidden sm:inline">Resumen</span>
+                </button>
+                <button
+                  onClick={() => setView("tabs")}
+                  className={`px-3 lg:px-4 py-2 rounded flex items-center gap-2 text-sm lg:text-base ${
+                    view === "tabs" ? "bg-purple-500 text-white" : "bg-gray-200"
+                  }`}
+                >
+                  <List size={18} />
+                  <span className="hidden sm:inline">Tabs</span>
+                </button>
+              </div>
+
               <button
-                onClick={() => setView("summary")}
-                className={`px-4 py-2 rounded flex items-center gap-2 ${
-                  view === "summary"
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200"
-                }`}
+                onClick={signOut}
+                className="px-3 lg:px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2 text-sm lg:text-base whitespace-nowrap"
               >
-                <Layout size={18} /> Resumen
-              </button>
-              <button
-                onClick={() => setView("tabs")}
-                className={`px-4 py-2 rounded flex items-center gap-2 ${
-                  view === "tabs" ? "bg-purple-500 text-white" : "bg-gray-200"
-                }`}
-              >
-                <List size={18} /> Tabs
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
-
-            <button
-              onClick={signOut}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2"
-            >
-              <LogOut size={18} /> Salir
-            </button>
           </div>
         </div>
       </header>
@@ -426,36 +432,39 @@ const App = () => {
         ) : (
           <div>
             <div className="bg-white rounded-t-lg shadow-lg">
-              <div className="flex border-b">
+              <div className="flex flex-col sm:flex-row border-b">
                 <button
                   onClick={() => setActiveTab("calendar")}
-                  className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 font-medium ${
+                  className={`flex-1 py-3 sm:py-4 px-4 sm:px-6 flex items-center justify-center gap-2 font-medium text-sm sm:text-base ${
                     activeTab === "calendar"
                       ? "text-purple-600 border-b-2 border-purple-600"
                       : "text-gray-500"
                   }`}
                 >
-                  <Calendar size={20} /> Calendario
+                  <Calendar size={20} />
+                  <span className="hidden xs:inline">Calendario</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("chart")}
-                  className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 font-medium ${
+                  className={`flex-1 py-3 sm:py-4 px-4 sm:px-6 flex items-center justify-center gap-2 font-medium text-sm sm:text-base ${
                     activeTab === "chart"
                       ? "text-purple-600 border-b-2 border-purple-600"
                       : "text-gray-500"
                   }`}
                 >
-                  <BarChart3 size={20} /> Progreso
+                  <BarChart3 size={20} />
+                  <span className="hidden xs:inline">Progreso</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("ideas")}
-                  className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 font-medium ${
+                  className={`flex-1 py-3 sm:py-4 px-4 sm:px-6 flex items-center justify-center gap-2 font-medium text-sm sm:text-base ${
                     activeTab === "ideas"
                       ? "text-purple-600 border-b-2 border-purple-600"
                       : "text-gray-500"
                   }`}
                 >
-                  <Lightbulb size={20} /> Ideas
+                  <Lightbulb size={20} />
+                  <span className="hidden xs:inline">Ideas</span>
                 </button>
               </div>
             </div>

@@ -19,7 +19,7 @@ const AuthScreen = ({ onSignIn, onSignUp }) => {
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
         <div className="text-6xl mb-4">📅</div>
         <h1 className="text-3xl font-bold text-purple-700 mb-2">
-          Content Manager
+          Agenda Manager
         </h1>
         <p className="text-gray-600 mb-8">
           Organiza tu calendario, mide tu progreso y guarda tus mejores ideas

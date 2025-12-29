@@ -1,149 +1,56 @@
-# TODO: Integración del Modo Finanzas
+# TODO: Fix Duplicate Categories Issue
 
-## Resumen del Proyecto
+## Problem
 
-**AgendaGestor** es una aplicación web de gestión personal desarrollada en React que permite a los usuarios organizar su tiempo y finanzas de manera integrada. Actualmente cuenta con un sistema completo de agenda con calendario, tareas, metas e ideas, y está en proceso de expansión para incluir funcionalidades financieras.
+Users are experiencing duplicate categories appearing in their finance app, causing confusion and data inconsistency.
 
-### Características Actuales (Modo Agenda):
+## Root Cause Analysis
 
-- **Calendario Interactivo**: Vista mensual con tareas y metas por fecha
-- **Gestión de Tareas**: Crear, editar, completar y eliminar tareas con soporte para tareas recurrentes
-- **Sistema de Metas**: Establecer y rastrear objetivos personales con fechas límite
-- **Banco de Ideas**: Almacenar y categorizar ideas creativas
-- **Gráficos de Progreso**: Visualización semanal del cumplimiento de tareas
-- **Autenticación**: Sistema de login/registro con Supabase
-- **Interfaz Responsiva**: Diseño adaptativo para móvil y desktop
-- **Tema Personalizable**: Modo claro con colores púrpura/rosa
+- The `cleanupDuplicates` function was only running once during initialization
+- No logging made it difficult to debug what was happening
+- The `initializeDefaults` function could potentially create duplicates if run multiple times
+- No proactive cleanup on every app load
 
-### Tecnologías Utilizadas:
+## Changes Made
 
-- **Frontend**: React 18, Tailwind CSS, Lucide Icons
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **Build Tool**: Vite
-- **Lenguaje**: JavaScript (ES6+)
+### ✅ 1. Enhanced cleanupDuplicates function
 
-### Arquitectura:
+- Added comprehensive logging to track:
+  - Total categories found
+  - Categories grouped by name
+  - Which categories are being kept vs deleted
+  - Success/failure of deletion operations
+- Improved error handling with detailed error messages
 
-- Componentes modulares organizados por funcionalidad
-- Estado centralizado en App.jsx
-- Servicios separados para operaciones de base de datos
-- Tema dinámico basado en modo seleccionado
+### ✅ 2. Modified loadFinancialData in App.jsx
 
-## Próximas Funcionalidades (Modo Finanzas):
+- Changed cleanup to run on every app load (not just after initialization)
+- Added logging for initialization and cleanup processes
+- Added feedback when duplicates are found and removed
+- Reload categories after cleanup to ensure UI reflects changes
 
-- Dashboard financiero con balance total
-- Gestión de ingresos y gastos
-- Sistema de presupuestos por categoría
-- Gráficos y reportes financieros
-- Exportación de datos
+### ✅ 3. Enhanced initializeDefaults function
 
-## Problemas Resueltos:
+- Added cleanup of existing duplicates before checking what to initialize
+- Added comprehensive logging for the initialization process
+- Improved error handling
 
-- [x] **Categorías Duplicadas**: Se implementó verificación de categorías existentes antes de inicializar las por defecto y función de limpieza de duplicados
-  - Modificado `initializeDefaults` en `categoryServices` para verificar existencia antes de insertar
-  - Agregada función `cleanupDuplicates` para eliminar categorías duplicadas
-  - Actualizado `loadFinancialData` en `App.jsx` para ejecutar limpieza automática
+## Testing Required
 
-## Análisis del Código Actual
+- [ ] Test with existing user data that has duplicates
+- [ ] Verify cleanup runs on every app load
+- [ ] Check console logs for proper execution flow
+- [ ] Ensure no categories are lost during cleanup
+- [ ] Verify system categories are preserved over user-created ones
 
-- El modo "finanzas" ya existe en `App.jsx` con un tema oscuro (slate/emerald)
-- Actualmente muestra un placeholder con "Modo Finanzas próximamente"
-- Tiene placeholders para Balance Total y Transacciones
-- El toggle entre "agenda" y "finanzas" ya está implementado
+## Monitoring
 
-## Archivos a Crear/Modificar
+- Monitor console logs for cleanup execution
+- Check that duplicate categories are properly removed
+- Ensure app performance is not impacted by frequent cleanup runs
 
-### 1. Base de Datos (Supabase)
+## Future Improvements
 
-- [ ] Crear tabla `transactions`:
-
-  - id (uuid, primary key)
-  - user_id (uuid, foreign key)
-  - type (text: 'income' | 'expense')
-  - amount (decimal)
-  - description (text)
-  - category (text)
-  - date (date)
-  - created_at (timestamp)
-
-- [ ] Crear tabla `budgets`:
-
-  - id (uuid, primary key)
-  - user_id (uuid, foreign key)
-  - category (text)
-  - amount (decimal)
-  - period (text: 'monthly' | 'weekly' | 'yearly')
-  - created_at (timestamp)
-
-- [ ] Crear tabla `accounts` (opcional):
-  - id (uuid, primary key)
-  - user_id (uuid, foreign key)
-  - name (text)
-  - type (text: 'checking' | 'savings' | 'credit')
-  - balance (decimal)
-
-### 2. Componentes Nuevos
-
-- [ ] `src/components/finance/FinanceView.jsx` - Vista principal de finanzas
-- [ ] `src/components/finance/TransactionList.jsx` - Lista de transacciones
-- [ ] `src/components/finance/BudgetChart.jsx` - Gráfico de presupuestos
-- [ ] `src/components/finance/AddTransactionModal.jsx` - Modal para agregar transacción
-- [ ] `src/components/finance/AddBudgetModal.jsx` - Modal para agregar presupuesto
-- [ ] `src/components/finance/FinanceSummary.jsx` - Resumen financiero
-
-### 3. Servicios
-
-- [ ] Actualizar `src/services/supabase.js` con funciones para finanzas:
-  - loadTransactions(userId)
-  - addTransaction(data)
-  - updateTransaction(id, data)
-  - deleteTransaction(id)
-  - loadBudgets(userId)
-  - addBudget(data)
-  - updateBudget(id, data)
-  - deleteBudget(id)
-
-### 4. Estado en App.jsx
-
-- [ ] Agregar estados para datos financieros:
-
-  - transactions: []
-  - budgets: []
-  - accounts: []
-  - showTransactionModal: false
-  - showBudgetModal: false
-
-- [ ] Agregar funciones CRUD para transacciones y presupuestos
-- [ ] Actualizar `loadAllData` para incluir datos financieros
-- [ ] Reemplazar `renderFinanzasContent` con contenido real
-
-### 5. Funcionalidades a Implementar
-
-- [ ] Dashboard financiero con balance total
-- [ ] Lista de transacciones con filtros (ingresos/gastos, categorías, fechas)
-- [ ] Gráficos de gastos por categoría
-- [ ] Sistema de presupuestos
-- [ ] Metas de ahorro
-- [ ] Exportar reportes (PDF/Excel)
-
-### 6. UI/UX
-
-- [ ] Tema consistente con el modo finanzas (slate/emerald)
-- [ ] Iconos apropiados (DollarSign, TrendingUp, etc.)
-- [ ] Responsive design
-- [ ] Animaciones y transiciones
-
-## Pasos de Implementación
-
-1. Crear esquema de base de datos en Supabase
-2. Implementar servicios de datos
-3. Crear componentes básicos
-4. Integrar en App.jsx
-5. Agregar funcionalidades avanzadas
-6. Testing y refinamiento
-
-## Dependencias Adicionales
-
-- [ ] Instalar librerías para gráficos (recharts o chart.js)
-- [ ] Librerías para exportar datos (xlsx, jspdf)
-- [ ] Librerías para manejo de fechas (date-fns)
+- Consider adding a manual cleanup button in settings
+- Add metrics to track duplicate cleanup frequency
+- Implement prevention of duplicate creation at the source

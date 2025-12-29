@@ -78,15 +78,26 @@ const FinanceView = ({
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
-  // Calcular gastos de la semana actual
+  // Calcular gastos de la semana actual (Lunes a Domingo)
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lunes
+  const dayOfWeek = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+  const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  startOfWeek.setDate(now.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0); // Normalizar a medianoche del lunes
+
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 6); // Domingo
+  endOfWeek.setHours(23, 59, 59, 999); // Fin del día domingo
 
   const weekTransactions = transactions.filter((t) => {
     const tDate = new Date(t.date);
-    return tDate >= startOfWeek && tDate <= endOfWeek;
+    // Normalizar la fecha de la transacción a medianoche para comparación
+    const normalizedTDate = new Date(
+      tDate.getFullYear(),
+      tDate.getMonth(),
+      tDate.getDate()
+    );
+    return normalizedTDate >= startOfWeek && normalizedTDate <= endOfWeek;
   });
 
   const weekExpenses = weekTransactions
@@ -349,7 +360,17 @@ const FinanceView = ({
             if (selectedTransaction) {
               // For editing: extract id and pass as separate parameters
               const { id, ...updates } = transactionData;
-              onUpdateTransaction(id, updates);
+
+              // Convert empty strings to null for UUID fields
+              const cleanedUpdates = {
+                ...updates,
+                category_id: updates.category_id || null,
+                to_account_id: updates.to_account_id || null,
+                subaccount_id: updates.subaccount_id || null,
+                to_subaccount_id: updates.to_subaccount_id || null,
+              };
+
+              onUpdateTransaction(id, cleanedUpdates);
             } else {
               // For adding: pass data and tags directly
               onAddTransaction(transactionData, selectedTags);

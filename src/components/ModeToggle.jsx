@@ -49,7 +49,7 @@ const ModeToggle = ({ mode, onModeChange }) => {
         </div>
       </label>
 
-      {/* Labels para indicar los modos */}
+      {/* Labels para indicar los modos
       <div className="mode-labels">
         <span className={`mode-label ${!isFinanceMode ? "active" : ""}`}>
           📅 Agenda
@@ -57,7 +57,7 @@ const ModeToggle = ({ mode, onModeChange }) => {
         <span className={`mode-label ${isFinanceMode ? "active" : ""}`}>
           💰 Finanzas
         </span>
-      </div>
+      </div> */}
     </div>
   );
 };

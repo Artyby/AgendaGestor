@@ -69,6 +69,11 @@ const AddTransactionModal = ({
       type,
     };
 
+    // Include transaction ID when editing
+    if (transaction) {
+      transactionData.id = transaction.id;
+    }
+
     onSave(transactionData, selectedTags);
     onClose();
   };

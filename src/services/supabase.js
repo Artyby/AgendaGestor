@@ -352,14 +352,75 @@ export const categoryServices = {
       },
     ];
 
-    const records = defaultCategories.map((cat) => ({
-      ...cat,
-      user_id: userId,
-      is_system: true,
-    }));
+    // Verificar qué categorías ya existen
+    const { data: existingCategories, error: checkError } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("user_id", userId)
+      .eq("is_system", true);
 
-    const { error } = await supabase.from("categories").insert(records);
-    if (error) throw error;
+    if (checkError) throw checkError;
+
+    const existingNames = existingCategories?.map((cat) => cat.name) || [];
+
+    // Filtrar solo las categorías que no existen
+    const categoriesToInsert = defaultCategories.filter(
+      (cat) => !existingNames.includes(cat.name)
+    );
+
+    if (categoriesToInsert.length > 0) {
+      const records = categoriesToInsert.map((cat) => ({
+        ...cat,
+        user_id: userId,
+        is_system: true,
+      }));
+
+      const { error } = await supabase.from("categories").insert(records);
+      if (error) throw error;
+    }
+  },
+
+  // Limpiar categorías duplicadas (mantener solo una por nombre)
+  async cleanupDuplicates(userId) {
+    // Obtener todas las categorías del usuario
+    const { data: allCategories, error: fetchError } = await supabase
+      .from("categories")
+      .select("id, name, is_system")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
+
+    if (fetchError) throw fetchError;
+
+    // Agrupar por nombre
+    const grouped = {};
+    allCategories.forEach((cat) => {
+      if (!grouped[cat.name]) {
+        grouped[cat.name] = [];
+      }
+      grouped[cat.name].push(cat);
+    });
+
+    // Para cada grupo con duplicados, mantener solo el primero
+    const idsToDelete = [];
+    Object.values(grouped).forEach((categories) => {
+      if (categories.length > 1) {
+        // Mantener el primero, eliminar los demás
+        const toDelete = categories.slice(1).map((cat) => cat.id);
+        idsToDelete.push(...toDelete);
+      }
+    });
+
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("categories")
+        .delete()
+        .in("id", idsToDelete);
+
+      if (deleteError) throw deleteError;
+      console.log(`Eliminadas ${idsToDelete.length} categorías duplicadas`);
+    }
+
+    return idsToDelete.length;
   },
 };
 

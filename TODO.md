@@ -29,13 +29,20 @@
 - Servicios separados para operaciones de base de datos
 - Tema dinámico basado en modo seleccionado
 
-### Próximas Funcionalidades (Modo Finanzas):
+## Próximas Funcionalidades (Modo Finanzas):
 
 - Dashboard financiero con balance total
 - Gestión de ingresos y gastos
 - Sistema de presupuestos por categoría
 - Gráficos y reportes financieros
 - Exportación de datos
+
+## Problemas Resueltos:
+
+- [x] **Categorías Duplicadas**: Se implementó verificación de categorías existentes antes de inicializar las por defecto y función de limpieza de duplicados
+  - Modificado `initializeDefaults` en `categoryServices` para verificar existencia antes de insertar
+  - Agregada función `cleanupDuplicates` para eliminar categorías duplicadas
+  - Actualizado `loadFinancialData` en `App.jsx` para ejecutar limpieza automática
 
 ## Análisis del Código Actual
 

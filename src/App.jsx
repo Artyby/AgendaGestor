@@ -32,6 +32,7 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("calendar");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Estados de Agenda
   const [tasks, setTasks] = useState([]);
@@ -177,6 +178,11 @@ const App = () => {
         await categoryServices.initializeDefaults(userId);
         const newCategories = await categoryServices.getAll(userId);
         setCategories(newCategories || []);
+      } else {
+        // Limpiar categorías duplicadas si existen
+        await categoryServices.cleanupDuplicates(userId);
+        const cleanedCategories = await categoryServices.getAll(userId);
+        setCategories(cleanedCategories || []);
       }
     } catch (error) {
       console.error(
@@ -724,145 +730,191 @@ const App = () => {
               : "bg-white"
           } rounded-lg shadow-lg p-4 transition-all duration-500`}
         >
-          {/* MOBILE: Stack vertical */}
-          <div className="flex flex-col gap-4 lg:hidden">
-            <div className="flex items-center justify-center">
-              <h1
-                className={`text-xl font-bold ${
-                  mode === "finanzas" ? "text-emerald-400" : "text-purple-700"
-                }`}
-              >
-                {mode === "agenda" ? "📅 Agenda" : "💰 Finanzas"}
-              </h1>
-            </div>
+          <div className="flex items-center justify-between gap-4">
+            {/* Título */}
+            <h1
+              className={`text-xl lg:text-2xl font-bold whitespace-nowrap ${
+                mode === "finanzas" ? "text-emerald-400" : "text-purple-700"
+              }`}
+            >
+              {mode === "agenda" ? "📅 Agenda" : "💰 Finanzas"}
+            </h1>
 
-            <div className="flex justify-center">
-              <ModeToggle mode={mode} onModeChange={setMode} />
-            </div>
-
-            <div className="flex items-center justify-center gap-2">
-              {user.user_metadata?.avatar_url && (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="Avatar"
-                  className="w-8 h-8 rounded-full"
-                />
-              )}
-              <span
-                className={`text-sm font-medium ${
-                  mode === "finanzas" ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                {user.user_metadata?.full_name || user.email}
-              </span>
-            </div>
-
-            {mode === "agenda" && (
-              <div className="flex gap-2 justify-center">
-                <button
-                  onClick={() => setView("summary")}
-                  className={`px-4 py-2 rounded flex items-center gap-2 text-sm ${
-                    view === "summary"
-                      ? `${theme.primary} text-white`
-                      : "bg-gray-200"
-                  }`}
-                >
-                  <Layout size={16} />
-                  <span>Resumen</span>
-                </button>
-                <button
-                  onClick={() => setView("tabs")}
-                  className={`px-4 py-2 rounded flex items-center gap-2 text-sm ${
-                    view === "tabs"
-                      ? `${theme.primary} text-white`
-                      : "bg-gray-200"
-                  }`}
-                >
-                  <List size={16} />
-                  <span>Tabs</span>
-                </button>
+            {/* Toggle de Modo y Menú */}
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:block">
+                <ModeToggle mode={mode} onModeChange={setMode} />
               </div>
-            )}
 
-            <div className="flex justify-center">
+              {/* Menú Hamburguesa */}
               <button
-                onClick={signOut}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2 text-sm"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={`p-2 rounded-lg transition-colors ${
+                  mode === "finanzas"
+                    ? "hover:bg-slate-800 text-gray-300"
+                    : "hover:bg-gray-100 text-gray-700"
+                }`}
+                aria-label="Menú"
               >
-                <LogOut size={16} />
-                <span>Salir</span>
+                {menuOpen ? (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
 
-          {/* DESKTOP: Layout horizontal */}
-          <div className="hidden lg:flex items-center justify-between gap-6">
-            <h1
-              className={`text-2xl font-bold whitespace-nowrap ${
-                mode === "finanzas" ? "text-emerald-400" : "text-purple-700"
-              }`}
+          {/* Menú Desplegable */}
+          {menuOpen && (
+            <div
+              className={`mt-4 pt-4 border-t ${
+                mode === "finanzas"
+                  ? "border-emerald-500/30"
+                  : "border-gray-200"
+              } space-y-3`}
             >
-              {mode === "agenda" ? "📅 Agenda Manager" : "💰 Finance Manager"}
-            </h1>
+              {/* Toggle de Modo en móvil */}
+              <div className="sm:hidden flex justify-center pb-3">
+                <ModeToggle mode={mode} onModeChange={setMode} />
+              </div>
 
-            <div className="flex-1 flex justify-center">
-              <ModeToggle mode={mode} onModeChange={setMode} />
-            </div>
+              {/* Información de Usuario */}
+              <div
+                className={`flex items-center gap-3 p-3 rounded-lg ${
+                  mode === "finanzas" ? "bg-slate-800" : "bg-gray-50"
+                }`}
+              >
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Avatar"
+                    className="w-10 h-10 rounded-full"
+                  />
+                ) : (
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      mode === "finanzas" ? "bg-emerald-500" : "bg-purple-500"
+                    }`}
+                  >
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={`text-sm font-medium truncate ${
+                      mode === "finanzas" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
+                    {user.user_metadata?.full_name || "Usuario"}
+                  </p>
+                  <p
+                    className={`text-xs truncate ${
+                      mode === "finanzas" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    {user.email}
+                  </p>
+                </div>
+              </div>
 
-            <div className="flex items-center gap-4">
+              {/* Opciones de Vista (solo en modo agenda) */}
               {mode === "agenda" && (
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  <p
+                    className={`text-xs font-semibold uppercase tracking-wider px-3 ${
+                      mode === "finanzas" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Tipo de Vista
+                  </p>
                   <button
-                    onClick={() => setView("summary")}
-                    className={`px-4 py-2 rounded flex items-center gap-2 ${
+                    onClick={() => {
+                      setView("summary");
+                      setMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 rounded-lg flex items-center gap-3 transition-colors ${
                       view === "summary"
-                        ? `${theme.primary} text-white`
-                        : "bg-gray-200"
+                        ? `${theme.primary} text-white shadow-md`
+                        : mode === "finanzas"
+                        ? "bg-slate-800 text-gray-300 hover:bg-slate-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     <Layout size={18} />
-                    <span>Resumen</span>
+                    <span className="font-medium">Resumen</span>
+                    {view === "summary" && (
+                      <span className="ml-auto text-xs">✓</span>
+                    )}
                   </button>
                   <button
-                    onClick={() => setView("tabs")}
-                    className={`px-4 py-2 rounded flex items-center gap-2 ${
+                    onClick={() => {
+                      setView("tabs");
+                      setMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 rounded-lg flex items-center gap-3 transition-colors ${
                       view === "tabs"
-                        ? `${theme.primary} text-white`
-                        : "bg-gray-200"
+                        ? `${theme.primary} text-white shadow-md`
+                        : mode === "finanzas"
+                        ? "bg-slate-800 text-gray-300 hover:bg-slate-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     <List size={18} />
-                    <span>Tabs</span>
+                    <span className="font-medium">Tabs</span>
+                    {view === "tabs" && (
+                      <span className="ml-auto text-xs">✓</span>
+                    )}
                   </button>
                 </div>
               )}
 
-              <div className="flex items-center gap-2">
-                {user.user_metadata?.avatar_url && (
-                  <img
-                    src={user.user_metadata.avatar_url}
-                    alt="Avatar"
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <span
-                  className={`text-sm font-medium ${
-                    mode === "finanzas" ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  {user.user_metadata?.full_name || user.email}
-                </span>
-              </div>
-
+              {/* Botón de Cerrar Sesión */}
               <button
                 onClick={signOut}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2"
+                className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center justify-center gap-2 font-medium transition-colors shadow-md mt-4"
               >
                 <LogOut size={18} />
-                <span>Salir</span>
+                <span>Cerrar Sesión</span>
               </button>
             </div>
-          </div>
+          )}
         </div>
       </header>
 

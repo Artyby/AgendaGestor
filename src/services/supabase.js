@@ -308,6 +308,8 @@ export const categoryServices = {
 
   // Inicializar categorías por defecto para nuevo usuario
   async initializeDefaults(userId) {
+    console.log("🚀 Inicializando categorías por defecto para userId:", userId);
+
     const defaultCategories = [
       // Ingresos
       { name: "Salario", type: "income", color: "#10b981", icon: "briefcase" },
@@ -352,6 +354,10 @@ export const categoryServices = {
       },
     ];
 
+    // Primero limpiar cualquier duplicado existente antes de verificar
+    console.log("🧹 Limpiando duplicados existentes antes de inicializar...");
+    await this.cleanupDuplicates(userId);
+
     // Verificar qué categorías ya existen
     const { data: existingCategories, error: checkError } = await supabase
       .from("categories")
@@ -359,13 +365,22 @@ export const categoryServices = {
       .eq("user_id", userId)
       .eq("is_system", true);
 
-    if (checkError) throw checkError;
+    if (checkError) {
+      console.error("❌ Error al verificar categorías existentes:", checkError);
+      throw checkError;
+    }
 
     const existingNames = existingCategories?.map((cat) => cat.name) || [];
+    console.log("📋 Categorías del sistema existentes:", existingNames);
 
     // Filtrar solo las categorías que no existen
     const categoriesToInsert = defaultCategories.filter(
       (cat) => !existingNames.includes(cat.name)
+    );
+
+    console.log(
+      "📝 Categorías a insertar:",
+      categoriesToInsert.map((c) => c.name)
     );
 
     if (categoriesToInsert.length > 0) {
@@ -376,20 +391,43 @@ export const categoryServices = {
       }));
 
       const { error } = await supabase.from("categories").insert(records);
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Error al insertar categorías por defecto:", error);
+        throw error;
+      }
+      console.log(
+        `✅ Insertadas ${categoriesToInsert.length} categorías por defecto`
+      );
+    } else {
+      console.log("✅ Todas las categorías por defecto ya existen");
     }
   },
 
   // Limpiar categorías duplicadas (mantener solo una por nombre)
   async cleanupDuplicates(userId) {
+    console.log("🔍 Ejecutando cleanupDuplicates para userId:", userId);
+
     // Obtener todas las categorías del usuario
     const { data: allCategories, error: fetchError } = await supabase
       .from("categories")
-      .select("id, name, is_system")
+      .select("id, name, is_system, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: true });
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error("❌ Error al obtener categorías:", fetchError);
+      throw fetchError;
+    }
+
+    console.log(`📊 Total de categorías encontradas: ${allCategories.length}`);
+    console.log(
+      "📋 Categorías:",
+      allCategories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        is_system: c.is_system,
+      }))
+    );
 
     // Agrupar por nombre
     const grouped = {};
@@ -400,24 +438,75 @@ export const categoryServices = {
       grouped[cat.name].push(cat);
     });
 
-    // Para cada grupo con duplicados, mantener solo el primero
+    console.log(
+      "🔗 Grupos por nombre:",
+      Object.keys(grouped).map((name) => ({
+        name,
+        count: grouped[name].length,
+        categories: grouped[name].map((c) => ({
+          id: c.id,
+          is_system: c.is_system,
+        })),
+      }))
+    );
+
+    // Para cada grupo con duplicados, mantener la lógica preferente:
+    // 1. Si hay una categoría del sistema, mantener esa
+    // 2. Si no hay del sistema, mantener la más antigua
     const idsToDelete = [];
     Object.values(grouped).forEach((categories) => {
       if (categories.length > 1) {
-        // Mantener el primero, eliminar los demás
-        const toDelete = categories.slice(1).map((cat) => cat.id);
-        idsToDelete.push(...toDelete);
+        console.log(
+          `⚠️  Duplicados encontrados para "${categories[0].name}":`,
+          categories.length
+        );
+
+        // Buscar si hay alguna categoría del sistema
+        const systemCategory = categories.find((cat) => cat.is_system);
+
+        if (systemCategory) {
+          console.log(
+            `✅ Manteniendo categoría del sistema: ${systemCategory.id} (${systemCategory.name})`
+          );
+          // Mantener la del sistema, eliminar las demás
+          const toDelete = categories
+            .filter((cat) => cat.id !== systemCategory.id)
+            .map((cat) => cat.id);
+          idsToDelete.push(...toDelete);
+          console.log(`🗑️  A eliminar (no sistema):`, toDelete);
+        } else {
+          console.log(
+            `📅 Manteniendo la más antigua: ${categories[0].id} (${categories[0].name})`
+          );
+          // No hay del sistema, mantener la primera (más antigua), eliminar las demás
+          const toDelete = categories.slice(1).map((cat) => cat.id);
+          idsToDelete.push(...toDelete);
+          console.log(`🗑️  A eliminar (más recientes):`, toDelete);
+        }
       }
     });
 
     if (idsToDelete.length > 0) {
+      console.log(
+        `🚨 Eliminando ${idsToDelete.length} categorías duplicadas:`,
+        idsToDelete
+      );
+
       const { error: deleteError } = await supabase
         .from("categories")
         .delete()
         .in("id", idsToDelete);
 
-      if (deleteError) throw deleteError;
-      console.log(`Eliminadas ${idsToDelete.length} categorías duplicadas`);
+      if (deleteError) {
+        console.error("❌ Error al eliminar duplicados:", deleteError);
+        throw deleteError;
+      }
+
+      console.log(
+        `✅ Eliminadas ${idsToDelete.length} categorías duplicadas exitosamente`
+      );
+    } else {
+      console.log("✅ No se encontraron categorías duplicadas");
     }
 
     return idsToDelete.length;

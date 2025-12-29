@@ -175,14 +175,22 @@ const App = () => {
 
       // Si no hay categorías, inicializar las por defecto
       if (!categoriesData || categoriesData.length === 0) {
+        console.log("📝 Inicializando categorías por defecto...");
         await categoryServices.initializeDefaults(userId);
         const newCategories = await categoryServices.getAll(userId);
         setCategories(newCategories || []);
+      }
+
+      // Siempre limpiar categorías duplicadas después de cargar/inicializar
+      console.log("🧹 Ejecutando limpieza de duplicados...");
+      const deletedCount = await categoryServices.cleanupDuplicates(userId);
+      if (deletedCount > 0) {
+        console.log(`✅ Se eliminaron ${deletedCount} categorías duplicadas`);
+        // Recargar categorías después de la limpieza
+        const finalCategories = await categoryServices.getAll(userId);
+        setCategories(finalCategories || []);
       } else {
-        // Limpiar categorías duplicadas si existen
-        await categoryServices.cleanupDuplicates(userId);
-        const cleanedCategories = await categoryServices.getAll(userId);
-        setCategories(cleanedCategories || []);
+        console.log("✅ No se encontraron categorías duplicadas");
       }
     } catch (error) {
       console.error(

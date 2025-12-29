@@ -27,7 +27,10 @@ import FinanceView from "./components/finance/FinanceView";
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState("agenda");
+  const [mode, setMode] = useState(() => {
+    const saved = localStorage.getItem("app-mode");
+    return saved || "agenda";
+  });
   const [view, setView] = useState("summary");
   const [activeTab, setActiveTab] = useState("calendar");
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -71,6 +74,11 @@ const App = () => {
   };
 
   const theme = themeColors[mode];
+
+  // Persistir el modo en localStorage
+  useEffect(() => {
+    localStorage.setItem("app-mode", mode);
+  }, [mode]);
 
   useEffect(() => {
     checkUser();

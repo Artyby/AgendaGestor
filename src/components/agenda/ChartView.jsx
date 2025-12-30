@@ -7,12 +7,13 @@ const ChartView = ({
   toggleGoalAchieved,
   deleteGoal,
   setShowGoalModal,
+  theme,
 }) => {
   const stats = getWeeklyStats();
   const maxValue = Math.max(...stats.map((s) => s.total), 1);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className={` rounded-lg shadow-lg p-6`}>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Progreso Semanal</h2>
         <button

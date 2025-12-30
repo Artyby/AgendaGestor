@@ -13,6 +13,7 @@ const CalendarView = ({
   setShowTaskModal,
   goals,
   getGoalsForDate,
+  theme,
 }) => {
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -32,7 +33,7 @@ const CalendarView = ({
   });
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+    <div className={` rounded-lg shadow-lg p-4 sm:p-6`}>
       {/* Header del calendario */}
       <div className="flex items-center justify-between mb-4">
         <button

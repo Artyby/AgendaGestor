@@ -56,12 +56,13 @@ const App = () => {
   // Colores según el modo
   const themeColors = {
     agenda: {
-      bg: "from-purple-100 via-pink-100 to-blue-100",
+      bg: "from-slate-900 via-purple-900 to-slate-900",
       primary: "bg-purple-500",
       primaryHover: "hover:bg-purple-600",
-      text: "text-purple-700",
+      text: "text-purple-400",
       border: "border-purple-600",
-      accent: "bg-purple-50",
+      accent: "bg-slate-800",
+      container: "bg-white/10 backdrop-blur-xl border-white/20",
     },
     finanzas: {
       bg: "from-gray-900 via-slate-800 to-gray-900",
@@ -70,6 +71,7 @@ const App = () => {
       text: "text-emerald-400",
       border: "border-emerald-500",
       accent: "bg-slate-800",
+      container: "bg-slate-800/50 backdrop-blur-xl border-slate-700/50",
     },
   };
 
@@ -609,6 +611,7 @@ const App = () => {
               setShowTaskModal={setShowTaskModal}
               goals={goals}
               getGoalsForDate={getGoalsForDate}
+              theme={theme}
             />
           </div>
           <div className="space-y-6">
@@ -618,8 +621,9 @@ const App = () => {
               toggleGoalAchieved={toggleGoalAchieved}
               deleteGoal={deleteGoal}
               setShowGoalModal={setShowGoalModal}
+              theme={theme}
             />
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className={`${theme.container} rounded-lg shadow-lg p-6`}>
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                 <Lightbulb className="text-yellow-500" /> Ideas Recientes
               </h3>
@@ -682,7 +686,7 @@ const App = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-b-lg shadow-lg p-6">
+          <div className={`${theme.container} rounded-b-lg shadow-lg p-6`}>
             {activeTab === "calendar" && (
               <CalendarView
                 currentMonth={currentMonth}
@@ -743,7 +747,7 @@ const App = () => {
           className={`${
             mode === "finanzas"
               ? "bg-slate-900 border border-emerald-500/30"
-              : "bg-white"
+              : theme.container
           } rounded-lg shadow-lg p-4 transition-all duration-500`}
         >
           <div className="flex items-center justify-between gap-4">

@@ -7,7 +7,6 @@ const ChartView = ({
   toggleGoalAchieved,
   deleteGoal,
   setShowGoalModal,
-  theme,
 }) => {
   const stats = getWeeklyStats();
   const maxValue = Math.max(...stats.map((s) => s.total), 1);

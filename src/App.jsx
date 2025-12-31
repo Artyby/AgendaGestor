@@ -7,6 +7,8 @@ import {
   List,
   LogOut,
   DollarSign,
+  Download,
+  Upload,
 } from "lucide-react";
 import {
   supabase,
@@ -15,6 +17,7 @@ import {
   categoryServices,
   goalServices,
   budgetServices,
+  exportServices,
 } from "./services/supabase";
 import ResetPassword from "./components/ResetPassword";
 import AuthScreen from "./components/AuthScreen";
@@ -261,6 +264,102 @@ const App = () => {
       resetAllData();
     } catch (error) {
       console.error("Error signing out:", error);
+    }
+  };
+
+  const handleBackup = async () => {
+    try {
+      console.log("🚀 Iniciando creación de backup...");
+
+      // Refresh the session to ensure we have a valid JWT token
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.refreshSession();
+      if (sessionError) {
+        console.error("❌ Error refreshing session:", sessionError);
+        alert("Error de autenticación. Por favor, vuelve a iniciar sesión.");
+        return;
+      }
+
+      console.log("✅ Sesión refrescada exitosamente");
+
+      const backupData = await exportServices.createFullBackup(user.id);
+      const filename = `backup-agenda-finanzas-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      exportServices.downloadJSON(backupData, filename);
+      console.log("✅ Backup creado y descargado exitosamente");
+      alert("Backup creado exitosamente. El archivo se ha descargado.");
+    } catch (error) {
+      console.error("❌ Error creando backup:", error);
+      alert("Error al crear el backup: " + error.message);
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      // Create file input element
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.style.display = "none";
+
+      input.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (
+          !confirm(
+            "⚠️ Esta acción reemplazará todos tus datos actuales. ¿Estás seguro de continuar?"
+          )
+        ) {
+          return;
+        }
+
+        try {
+          console.log("🚀 Iniciando importación de backup...");
+
+          // Refresh the session to ensure we have a valid JWT token
+          const { error: sessionError } = await supabase.auth.refreshSession();
+          if (sessionError) {
+            console.error("❌ Error refreshing session:", sessionError);
+            alert(
+              "Error de autenticación. Por favor, vuelve a iniciar sesión."
+            );
+            return;
+          }
+
+          console.log("✅ Sesión refrescada exitosamente");
+
+          // Read and parse the backup file
+          const backupJson = await exportServices.readJSONFile(file);
+
+          // Restore data from backup
+          const results = await exportServices.restoreFromBackup(
+            user.id,
+            JSON.stringify(backupJson)
+          );
+
+          console.log("✅ Importación completada:", results);
+
+          // Reload all data to reflect changes
+          await loadAllData(user.id);
+
+          alert(
+            `✅ Importación completada exitosamente!\n\nDatos restaurados:\n• ${results.accounts} cuentas\n• ${results.categories} categorías\n• ${results.tags} etiquetas\n• ${results.transactions} transacciones\n• ${results.budgets} presupuestos\n• ${results.goals} metas`
+          );
+        } catch (error) {
+          console.error("❌ Error importando backup:", error);
+          alert("Error al importar el backup: " + error.message);
+        }
+      };
+
+      // Trigger file selection
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } catch (error) {
+      console.error("❌ Error iniciando importación:", error);
+      alert("Error al iniciar la importación: " + error.message);
     }
   };
 
@@ -950,6 +1049,32 @@ const App = () => {
                   </button>
                 </div>
               )}
+
+              {/* Opción de Backup */}
+              <button
+                onClick={handleBackup}
+                className={`w-full px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors shadow-md ${
+                  mode === "finanzas"
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    : "bg-purple-500 text-white hover:bg-purple-600"
+                }`}
+              >
+                <Download size={18} />
+                <span>Crear Backup</span>
+              </button>
+
+              {/* Opción de Importar */}
+              <button
+                onClick={handleImport}
+                className={`w-full px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors shadow-md ${
+                  mode === "finanzas"
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+              >
+                <Upload size={18} />
+                <span>Importar Backup</span>
+              </button>
 
               {/* Botón de Cerrar Sesión */}
               <button

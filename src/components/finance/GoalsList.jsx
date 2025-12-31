@@ -77,6 +77,23 @@ const GoalsList = ({
     return colors[priority] || colors.low;
   };
 
+  const getRecurrenceLabel = (recurrence, interval) => {
+    if (!recurrence || recurrence === "none") return null;
+
+    const labels = {
+      weekly: "Semanal",
+      monthly: "Mensual",
+      quarterly: "Trimestral",
+      yearly: "Anual",
+    };
+
+    const baseLabel = labels[recurrence] || recurrence;
+    if (interval && interval > 1) {
+      return `Cada ${interval} ${baseLabel.toLowerCase()}`;
+    }
+    return baseLabel;
+  };
+
   return (
     <div className="bg-slate-800/50 rounded-lg p-6 border border-emerald-500/20">
       <div className="flex items-center justify-between mb-4">
@@ -147,6 +164,18 @@ const GoalsList = ({
                           )}`}
                         >
                           {getPriorityLabel(goal.priority)}
+                        </span>
+                      )}
+                      {getRecurrenceLabel(
+                        goal.recurrence,
+                        goal.recurrence_interval
+                      ) && (
+                        <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">
+                          🔄{" "}
+                          {getRecurrenceLabel(
+                            goal.recurrence,
+                            goal.recurrence_interval
+                          )}
                         </span>
                       )}
                       {goal.deadline && (

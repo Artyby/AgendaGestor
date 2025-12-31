@@ -11,6 +11,8 @@ const AddGoalModal = ({ onSave, onClose, accounts, goal }) => {
     category: goal?.category || "savings",
     priority: goal?.priority || "medium",
     account_id: goal?.account_id || "",
+    recurrence: goal?.recurrence || "none",
+    recurrence_interval: goal?.recurrence_interval || 1,
   });
 
   const categories = [
@@ -234,6 +236,50 @@ const AddGoalModal = ({ onSave, onClose, accounts, goal }) => {
               Puedes vincular una cuenta para rastrear automáticamente el
               progreso
             </p>
+          </div>
+
+          {/* Recurrencia */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Repetir Meta
+              </label>
+              <select
+                name="recurrence"
+                value={formData.recurrence}
+                onChange={handleChange}
+                className="w-full bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700 focus:border-emerald-500 focus:outline-none"
+              >
+                <option value="none">Nunca</option>
+                <option value="weekly">Semanalmente</option>
+                <option value="monthly">Mensualmente</option>
+                <option value="quarterly">Trimestralmente</option>
+                <option value="yearly">Anualmente</option>
+              </select>
+            </div>
+
+            {formData.recurrence !== "none" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Cada cuánto
+                </label>
+                <input
+                  type="number"
+                  name="recurrence_interval"
+                  value={formData.recurrence_interval}
+                  onChange={handleChange}
+                  min="1"
+                  max="12"
+                  className="w-full bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700 focus:border-emerald-500 focus:outline-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.recurrence === "weekly" && "semanas"}
+                  {formData.recurrence === "monthly" && "meses"}
+                  {formData.recurrence === "quarterly" && "trimestres"}
+                  {formData.recurrence === "yearly" && "años"}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Preview del progreso */}

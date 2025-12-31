@@ -20,6 +20,102 @@ import AddAccountModal from "./AddAccountModal";
 import AddGoalModal from "./AddGoalModal";
 import AddBudgetModal from "./AddBudgetModal";
 
+// Componente simplificado de metas para el overview
+const GoalsPreview = ({ activeGoals, onShowGoalModal, onSetActiveTab }) => {
+  const displayGoals = activeGoals.slice(0, 3);
+
+  if (displayGoals.length === 0) {
+    return (
+      <div className="bg-slate-800/50 rounded-lg p-6 border border-emerald-500/20">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+            <Target size={20} />
+            Metas Activas
+          </h3>
+          <button
+            onClick={onShowGoalModal}
+            className="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1"
+          >
+            <Plus size={16} />
+            Nueva
+          </button>
+        </div>
+        <p className="text-gray-400 text-center py-8">
+          No tienes metas activas. ¡Crea una para comenzar!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-800/50 rounded-lg p-4 sm:p-6 border border-emerald-500/20 overflow-hidden">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2 truncate">
+          <Target size={20} className="flex-shrink-0" />
+          <span className="truncate">Metas Activas</span>
+        </h3>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onShowGoalModal}
+            className="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1"
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">Nueva</span>
+          </button>
+          <button
+            onClick={() => onSetActiveTab("goals")}
+            className="text-gray-400 hover:text-gray-300 text-sm"
+          >
+            Ver todas ({activeGoals.length})
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {displayGoals.map((goal) => {
+          const progress = Math.min(
+            (parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) *
+              100,
+            100
+          );
+
+          return (
+            <div key={goal.id} className="bg-slate-900/50 rounded-lg p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-gray-200 truncate">
+                    {goal.name}
+                  </h4>
+                  <p className="text-sm text-gray-400">
+                    $
+                    {parseFloat(goal.current_amount).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}{" "}
+                    de $
+                    {parseFloat(goal.target_amount).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
+                </div>
+                <span className="text-sm font-semibold text-emerald-400 ml-2">
+                  {progress.toFixed(0)}%
+                </span>
+              </div>
+
+              <div className="w-full bg-slate-700/50 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const FinanceView = ({
   accounts,
   transactions,
@@ -39,8 +135,6 @@ const FinanceView = ({
   onAddGoal,
   onUpdateGoal,
   onDeleteGoal,
-  onExportData,
-  userId,
 }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showTransactionModal, setShowTransactionModal] = useState(false);
@@ -48,6 +142,9 @@ const FinanceView = ({
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedBudget, setSelectedBudget] = useState(null);
   const [transactionType, setTransactionType] = useState("expense");
 
   // Calcular balance total
@@ -121,103 +218,6 @@ const FinanceView = ({
     { id: "goals", label: "Metas", icon: Target },
     { id: "analytics", label: "Análisis", icon: TrendingUp },
   ];
-
-  // Componente simplificado de metas para el overview
-  const GoalsPreview = () => {
-    const displayGoals = activeGoals.slice(0, 3);
-
-    if (displayGoals.length === 0) {
-      return (
-        <div className="bg-slate-800/50 rounded-lg p-6 border border-emerald-500/20">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
-              <Target size={20} />
-              Metas Activas
-            </h3>
-            <button
-              onClick={() => setShowGoalModal(true)}
-              className="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1"
-            >
-              <Plus size={16} />
-              Nueva
-            </button>
-          </div>
-          <p className="text-gray-400 text-center py-8">
-            No tienes metas activas. ¡Crea una para comenzar!
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="bg-slate-800/50 rounded-lg p-4 sm:p-6 border border-emerald-500/20 overflow-hidden">
-        <div className="flex items-center justify-between mb-4 gap-2">
-          <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2 truncate">
-            <Target size={20} className="flex-shrink-0" />
-            <span className="truncate">Metas Activas</span>
-          </h3>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowGoalModal(true)}
-              className="text-emerald-400 hover:text-emerald-300 text-sm flex items-center gap-1"
-            >
-              <Plus size={16} />
-              <span className="hidden sm:inline">Nueva</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("goals")}
-              className="text-gray-400 hover:text-gray-300 text-sm"
-            >
-              Ver todas ({activeGoals.length})
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {displayGoals.map((goal) => {
-            const progress = Math.min(
-              (parseFloat(goal.current_amount) /
-                parseFloat(goal.target_amount)) *
-                100,
-              100
-            );
-
-            return (
-              <div key={goal.id} className="bg-slate-900/50 rounded-lg p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-200 truncate">
-                      {goal.name}
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      $
-                      {parseFloat(goal.current_amount).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}{" "}
-                      de $
-                      {parseFloat(goal.target_amount).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-emerald-400 ml-2">
-                    {progress.toFixed(0)}%
-                  </span>
-                </div>
-
-                <div className="w-full bg-slate-700/50 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -360,10 +360,17 @@ const FinanceView = ({
               <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
                 <AccountsList
                   accounts={accounts}
-                  onEdit={onUpdateAccount}
+                  onEdit={(account) => {
+                    setSelectedAccount(account);
+                    setShowAccountModal(true);
+                  }}
                   onDelete={onDeleteAccount}
                 />
-                <GoalsPreview />
+                <GoalsPreview
+                  activeGoals={activeGoals}
+                  onShowGoalModal={() => setShowGoalModal(true)}
+                  onSetActiveTab={setActiveTab}
+                />
               </div>
               <BudgetProgress
                 budgets={budgets.slice(0, 4)}
@@ -410,7 +417,10 @@ const FinanceView = ({
               <BudgetProgress
                 budgets={budgets}
                 transactions={monthTransactions}
-                onEdit={onUpdateBudget}
+                onEdit={(budget) => {
+                  setSelectedBudget(budget);
+                  setShowBudgetModal(true);
+                }}
                 onDelete={onDeleteBudget}
                 detailed={true}
               />
@@ -433,7 +443,10 @@ const FinanceView = ({
               </div>
               <GoalsList
                 goals={goals}
-                onEdit={onUpdateGoal}
+                onEdit={(goal) => {
+                  setSelectedGoal(goal);
+                  setShowGoalModal(true);
+                }}
                 onDelete={onDeleteGoal}
                 onSave={onAddGoal}
                 detailed={true}
@@ -485,24 +498,54 @@ const FinanceView = ({
 
       {showAccountModal && (
         <AddAccountModal
-          onSave={onAddAccount}
-          onClose={() => setShowAccountModal(false)}
+          account={selectedAccount}
+          onSave={(accountData) => {
+            if (selectedAccount) {
+              onUpdateAccount(selectedAccount.id, accountData);
+            } else {
+              onAddAccount(accountData);
+            }
+          }}
+          onClose={() => {
+            setShowAccountModal(false);
+            setSelectedAccount(null);
+          }}
         />
       )}
 
       {showGoalModal && (
         <AddGoalModal
+          goal={selectedGoal}
           accounts={accounts}
-          onSave={onAddGoal}
-          onClose={() => setShowGoalModal(false)}
+          onSave={(goalData) => {
+            if (selectedGoal) {
+              onUpdateGoal(selectedGoal.id, goalData);
+            } else {
+              onAddGoal(goalData);
+            }
+          }}
+          onClose={() => {
+            setShowGoalModal(false);
+            setSelectedGoal(null);
+          }}
         />
       )}
 
       {showBudgetModal && (
         <AddBudgetModal
+          budget={selectedBudget}
           categories={categories}
-          onSave={onAddBudget}
-          onClose={() => setShowBudgetModal(false)}
+          onSave={(budgetData) => {
+            if (selectedBudget) {
+              onUpdateBudget(selectedBudget.id, budgetData);
+            } else {
+              onAddBudget(budgetData);
+            }
+          }}
+          onClose={() => {
+            setShowBudgetModal(false);
+            setSelectedBudget(null);
+          }}
         />
       )}
     </div>

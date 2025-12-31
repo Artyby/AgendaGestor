@@ -3,3 +3,11 @@
 - [x] Add state for menu open/close
 - [x] Add menu button and dropdown in transaction items
 - [x] Test the delete functionality (code review completed)
+
+- [ ] Create backup service functions in supabase.js
+- [ ] Add backup/restore UI components
+- [ ] Implement data export as JSON
+- [ ] Implement data import with validation
+- [ ] Add backup/restore buttons to settings or finance view
+- [ ] Test backup and restore functionality
+- [ ] Handle edge cases like data conflicts during import

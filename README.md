@@ -29,6 +29,15 @@ Una aplicación web completa para la gestión de agenda personal y finanzas, con
 - Datos personales protegidos por usuario
 - Sincronización en tiempo real con Supabase
 
+### 💾 Backup y Restauración
+
+- **Crear Backup Completo**: Exporta todos tus datos (tareas, ideas, metas, cuentas, transacciones, categorías, etiquetas, presupuestos y metas financieras) a un archivo JSON
+- **Importar Backup**: Restaura todos tus datos desde un archivo de backup con confirmación de seguridad
+- **Protección de Sesión**: Refresco automático de tokens JWT para evitar expiraciones durante operaciones largas
+- **Validación de Archivos**: Solo acepta archivos JSON válidos generados por la aplicación
+- **Confirmación de Riesgo**: Diálogo de advertencia antes de importar para prevenir pérdida accidental de datos
+- **Actualización Automática**: Recarga automática de todos los datos en la interfaz después de la importación
+
 ### 🎨 Interfaz de Usuario
 
 - Diseño moderno y responsivo

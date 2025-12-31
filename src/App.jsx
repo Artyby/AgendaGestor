@@ -16,6 +16,7 @@ import {
   goalServices,
   budgetServices,
 } from "./services/supabase";
+import ResetPassword from "./components/ResetPassword";
 import AuthScreen from "./components/AuthScreen";
 import ModeToggle from "./components/ModeToggle";
 import CalendarView from "./components/agenda/CalendarView";
@@ -234,6 +235,22 @@ const App = () => {
     } catch (error) {
       console.error("Error signing up:", error);
       alert("Error al crear cuenta: " + error.message);
+    }
+  };
+  // Agrega esta función junto a signInWithEmail y signUpWithEmail (alrededor de la línea 235)
+
+  const handlePasswordReset = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      return true; // Retornar true si fue exitoso
+    } catch (error) {
+      console.error("Error al enviar email de recuperación:", error);
+      throw error; // Re-lanzar el error para que el modal lo maneje
     }
   };
 
@@ -597,7 +614,7 @@ const App = () => {
   const renderAgendaContent = () => (
     <>
       {view === "summary" ? (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6 ">
           <div className="space-y-6">
             <CalendarView
               currentMonth={currentMonth}
@@ -624,16 +641,16 @@ const App = () => {
               theme={theme}
             />
             <div className={`${theme.container} rounded-lg shadow-lg p-6`}>
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                <Lightbulb className="text-yellow-500" /> Ideas Recientes
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-white">
+                <Lightbulb className="text-yellow-500 " /> Ideas Recientes
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 {ideas.slice(0, 3).map((idea) => (
                   <div
                     key={idea.id}
                     className="p-3 bg-purple-50 rounded border-l-4 border-purple-500"
                   >
-                    <div className="font-medium">{idea.title}</div>
+                    <div className="font-medium ">{idea.title}</div>
                     <div className="text-sm text-gray-600">{idea.category}</div>
                   </div>
                 ))}
@@ -735,7 +752,16 @@ const App = () => {
   }
 
   if (!user) {
-    return <AuthScreen onSignIn={signInWithEmail} onSignUp={signUpWithEmail} />;
+    return (
+      <AuthScreen
+        onSignIn={signInWithEmail}
+        onSignUp={signUpWithEmail}
+        onPasswordReset={handlePasswordReset}
+      />
+    );
+  }
+  if (window.location.pathname === "/reset-password") {
+    return <ResetPassword />;
   }
 
   return (

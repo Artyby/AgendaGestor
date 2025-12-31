@@ -14,7 +14,7 @@ const ChartView = ({
   return (
     <div className={` rounded-lg shadow-lg p-6`}>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Progreso Semanal</h2>
+        <h2 className="text-2xl font-bold  text-white">Progreso Semanal</h2>
         <button
           onClick={() => setShowGoalModal(true)}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-2"
@@ -26,8 +26,10 @@ const ChartView = ({
       <div className="grid grid-cols-7 gap-4 mb-8">
         {stats.map((stat, i) => (
           <div key={i} className="text-center">
-            <div className="text-sm font-medium mb-2">{stat.day}</div>
-            <div className="relative h-40 bg-gray-100 rounded">
+            <div className="text-sm font-medium mb-2 text-purple-500">
+              {stat.day}
+            </div>
+            <div className="relative h-40  bg-gray-100 rounded">
               {stat.total > 0 && (
                 <>
                   <div
@@ -44,7 +46,7 @@ const ChartView = ({
                 </>
               )}
             </div>
-            <div className="text-xs mt-2 text-gray-600">
+            <div className="text-xs mt-2 text-green-600">
               {stat.completed}/{stat.total}
             </div>
           </div>
@@ -63,7 +65,7 @@ const ChartView = ({
       </div>
 
       <div className="space-y-3">
-        <h3 className="font-bold text-lg">Metas</h3>
+        <h3 className="font-bold text-lg text-white">Metas</h3>
         {goals.map((goal) => {
           const isOverdue =
             goal.deadline &&

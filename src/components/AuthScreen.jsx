@@ -9,12 +9,16 @@ import {
   Wallet,
 } from "lucide-react";
 
-export default function AuthScreen({ onSignIn, onSignUp }) {
+export default function AuthScreen({ onSignIn, onSignUp, onPasswordReset }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +34,30 @@ export default function AuthScreen({ onSignIn, onSignUp }) {
       console.error("Error en autenticación:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      setResetMessage("Por favor ingresa tu email");
+      return;
+    }
+
+    setResetLoading(true);
+    setResetMessage("");
+
+    try {
+      await onPasswordReset(resetEmail);
+      setResetMessage("¡Email enviado! Revisa tu bandeja de entrada");
+      setTimeout(() => {
+        setShowResetModal(false);
+        setResetEmail("");
+        setResetMessage("");
+      }, 3000);
+    } catch (error) {
+      setResetMessage("Error al enviar el email. Intenta de nuevo.");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -96,7 +124,7 @@ export default function AuthScreen({ onSignIn, onSignUp }) {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-              <span>Datos seguros y encriptados</span>
+              <span>Datos seguros</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-pink-400"></div>
@@ -198,6 +226,7 @@ export default function AuthScreen({ onSignIn, onSignUp }) {
                   </label>
                   <button
                     type="button"
+                    onClick={() => setShowResetModal(true)}
                     className="text-purple-400 hover:text-purple-300 transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
@@ -238,6 +267,80 @@ export default function AuthScreen({ onSignIn, onSignUp }) {
           </p>
         </div>
       </div>
+
+      {/* Modal de Recuperación de Contraseña */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-8 max-w-md w-full">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Recuperar Contraseña
+            </h2>
+            <p className="text-slate-400 mb-6">
+              Ingresa tu email y te enviaremos un enlace para restablecer tu
+              contraseña
+            </p>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Mail size={16} />
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  placeholder="tu@email.com"
+                />
+              </div>
+
+              {resetMessage && (
+                <div
+                  className={`p-3 rounded-lg text-sm ${
+                    resetMessage.includes("Error") ||
+                    resetMessage.includes("ingresa")
+                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                      : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  }`}
+                >
+                  {resetMessage}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setShowResetModal(false);
+                    setResetEmail("");
+                    setResetMessage("");
+                  }}
+                  className="flex-1 py-3 px-4 bg-slate-700 text-white rounded-xl hover:bg-slate-600 font-medium transition-all"
+                  disabled={resetLoading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handlePasswordReset}
+                  disabled={resetLoading}
+                  className={`flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all ${
+                    resetLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {resetLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Enviando...
+                    </span>
+                  ) : (
+                    "Enviar Email"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

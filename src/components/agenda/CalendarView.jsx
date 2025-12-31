@@ -35,14 +35,14 @@ const CalendarView = ({
   return (
     <div className={` rounded-lg shadow-lg p-4 sm:p-6`}>
       {/* Header del calendario */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 text-white ">
         <button
           onClick={() =>
             setCurrentMonth(
               new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
             )
           }
-          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          className="p-2  text-black bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
           aria-label="Mes anterior"
         >
           <ChevronLeft size={20} />
@@ -56,7 +56,7 @@ const CalendarView = ({
               new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
             )
           }
-          className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          className="p-2 text-black bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
           aria-label="Mes siguiente"
         >
           <ChevronRight size={20} />
@@ -68,7 +68,7 @@ const CalendarView = ({
         {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
           <div
             key={day}
-            className="text-center font-semibold text-gray-600 text-xs sm:text-sm py-2"
+            className="text-center font-semibold text-purple-500 text-xs sm:text-sm py-2"
           >
             {day}
           </div>

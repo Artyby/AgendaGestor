@@ -6,6 +6,9 @@ import {
   Calendar,
   Filter,
   ChevronRight,
+  MoreVertical,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 
 const TransactionList = ({
@@ -21,6 +24,7 @@ const TransactionList = ({
 }) => {
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [menuOpen, setMenuOpen] = useState(null);
 
   const getTransactionIcon = (type) => {
     switch (type) {
@@ -212,12 +216,14 @@ const TransactionList = ({
           filteredTransactions.map((transaction) => (
             <div
               key={transaction.id}
-              onClick={() => onEdit(transaction)}
-              className="bg-slate-900/70 rounded-lg p-4 hover:bg-slate-900/90 transition-all duration-200 cursor-pointer group"
+              className="bg-slate-900/70 rounded-lg p-4 hover:bg-slate-900/90 transition-all duration-200 group relative"
             >
               <div className="flex items-center justify-between gap-3">
                 {/* Icono y detalles */}
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                  onClick={() => onEdit(transaction)}
+                >
                   {getTransactionIcon(transaction.type)}
 
                   <div className="flex-1 min-w-0">
@@ -252,18 +258,74 @@ const TransactionList = ({
                   </div>
                 </div>
 
-                {/* Monto */}
-                <div className="text-right flex-shrink-0">
-                  <p
-                    className={`text-lg font-bold ${getTransactionColor(
-                      transaction.type
-                    )}`}
-                  >
-                    {getTransactionSign(transaction.type)}$
-                    {parseFloat(transaction.amount).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </p>
+                {/* Monto y menú */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="text-right">
+                    <p
+                      className={`text-lg font-bold ${getTransactionColor(
+                        transaction.type
+                      )}`}
+                    >
+                      {getTransactionSign(transaction.type)}$
+                      {parseFloat(transaction.amount).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+
+                  {/* Menú de opciones */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(
+                          menuOpen === transaction.id ? null : transaction.id
+                        );
+                      }}
+                      className="p-1 hover:bg-slate-700/50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <MoreVertical size={18} className="text-gray-400" />
+                    </button>
+
+                    {menuOpen === transaction.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setMenuOpen(null)}
+                        />
+                        <div className="absolute right-0 mt-1 bg-slate-800 rounded-lg shadow-xl border border-slate-700 py-1 z-20 min-w-[140px]">
+                          <button
+                            onClick={() => {
+                              onEdit(transaction);
+                              setMenuOpen(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-slate-700 flex items-center gap-2"
+                          >
+                            <Edit2 size={14} />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `¿Eliminar la transacción "${
+                                    transaction.description || "Sin descripción"
+                                  }"?`
+                                )
+                              ) {
+                                onDelete(transaction.id);
+                              }
+                              setMenuOpen(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-slate-700 flex items-center gap-2"
+                          >
+                            <Trash2 size={14} />
+                            Eliminar
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

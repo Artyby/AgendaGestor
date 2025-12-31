@@ -1,5 +1,5 @@
-- [x] Cambiar el título de "Agenda Manager" a "AgenFine" en AuthScreen.jsx
-- [x] Actualizar la descripción para incluir gestión de finanzas: "Organiza tu calendario, gestiona tus finanzas, mide tu progreso y guarda tus mejores ideas"
-- [ ] Implementar efecto dual tono en el fondo: gradiente lineal de izquierda a derecha con colores para agenda (púrpura claro a blanco) y finanzas (neón a azul oscuro)
-- [ ] Ajustar el color del título si es necesario para que coincida con el tema
-      auto
+- [x] Add delete menu to TransactionList component
+- [x] Import necessary icons (MoreVertical, Edit2, Trash2)
+- [x] Add state for menu open/close
+- [x] Add menu button and dropdown in transaction items
+- [x] Test the delete functionality (code review completed)

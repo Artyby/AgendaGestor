@@ -94,7 +94,7 @@ export default function AuthScreen({ onSignIn, onSignUp, onPasswordReset }) {
         <div className="hidden lg:block space-y-8 text-white">
           <div>
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-emerald-400 bg-clip-text text-transparent">
-              AgendaGestor
+              AgenFine
             </h1>
             <p className="text-xl text-slate-300">
               Tu vida organizada en un solo lugar
@@ -139,7 +139,7 @@ export default function AuthScreen({ onSignIn, onSignUp, onPasswordReset }) {
             {/* Logo móvil */}
             <div className="lg:hidden mb-6 text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-emerald-400 bg-clip-text text-transparent">
-                AgendaGestor
+                AgenFine
               </h1>
             </div>
 

@@ -271,17 +271,6 @@ const App = () => {
     try {
       console.log("🚀 Iniciando creación de backup...");
 
-      // Refresh the session to ensure we have a valid JWT token
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.refreshSession();
-      if (sessionError) {
-        console.error("❌ Error refreshing session:", sessionError);
-        alert("Error de autenticación. Por favor, vuelve a iniciar sesión.");
-        return;
-      }
-
-      console.log("✅ Sesión refrescada exitosamente");
-
       const backupData = await exportServices.createFullBackup(user.id);
       const filename = `backup-agenda-finanzas-${
         new Date().toISOString().split("T")[0]
